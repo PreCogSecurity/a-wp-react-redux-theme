@@ -4,7 +4,7 @@
   "description": "",
   "main": "webpack.config.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "build": "webpack",
     "prod": "webpack -p",
     "watch": "webpack --watch"
@@ -45,5 +45,12 @@
     "sass-loader": "^6.0",
     "style-loader": "^0.19",
     "webpack": "^3.10"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "eslint": "^8.56.0"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
