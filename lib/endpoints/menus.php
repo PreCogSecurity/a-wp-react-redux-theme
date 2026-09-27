@@ -65,15 +65,17 @@ if ( ! class_exists( 'Menus_Endpoint' ) ) :
 
 			register_rest_route( self::get_plugin_namespace(), '/menus', array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_menus' ),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_menus' ),
+					'permission_callback' => '__return_true',
 				)
 			) );
 
 			register_rest_route( self::get_plugin_namespace(), '/menus/(?P<id>\d+)', array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_menu' ),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_menu' ),
+					'permission_callback' => '__return_true',
 					'args'     => array(
 						'context' => array(
 							'default' => 'view',
@@ -84,15 +86,17 @@ if ( ! class_exists( 'Menus_Endpoint' ) ) :
 
 			register_rest_route( self::get_plugin_namespace(), '/menu-locations', array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_menu_locations' ),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_menu_locations' ),
+					'permission_callback' => '__return_true',
 				)
 			) );
 
 			register_rest_route( self::get_plugin_namespace(), '/menu-locations/(?P<location>[a-zA-Z0-9_-]+)', array(
 				array(
-					'methods'  => WP_REST_Server::READABLE,
-					'callback' => array( $this, 'get_menu_location' ),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_menu_location' ),
+					'permission_callback' => '__return_true',
 				)
 			) );
 		}
@@ -310,7 +314,7 @@ if ( ! class_exists( 'Menus_Endpoint' ) ) :
 					'url'         => $item->url,
 					'attr'        => $item->attr_title,
 					'target'      => $item->target,
-					'classes'     => implode( ' ', $item->classes ),
+					'classes'     => implode( ' ', (array) $item->classes ),
 					'xfn'         => $item->xfn,
 					'description' => $item->description,
 					'object_id'   => abs( $item->object_id ),
@@ -403,12 +407,12 @@ if ( ! class_exists( 'Menus_Endpoint' ) ) :
 				'url'         => $item['url'],
 				'attr'        => $item['attr_title'],
 				'target'      => $item['target'],
-				'classes'     => implode( ' ', $item['classes'] ),
+				'classes'     => implode( ' ', (array) $item['classes'] ),
 				'xfn'         => $item['xfn'],
 				'description' => $item['description'],
 				'object_id'   => abs( $item['object_id'] ),
 				'object'      => $item['object'],
-				'object_slug' => get_post( $item['object_id'] )->post_name,
+				'object_slug'   => $this->get_object_slug( $item['object_id'] ),
 				'type'        => $item['type'],
 				'type_label'  => $item['type_label'],
 			);
@@ -418,6 +422,31 @@ if ( ! class_exists( 'Menus_Endpoint' ) ) :
 			}
 
 			return apply_filters( 'rest_menus_format_menu_item', $menu_item );
+		}
+
+		/**
+		 * Slug of the object a menu item points at.
+		 *
+		 * A menu entry can outlive the post it referenced (deleted page, removed
+		 * custom post). get_post() then returns null and reading ->post_name on
+		 * it is a fatal Error on PHP 8, which took down the whole menu response.
+		 *
+		 * @since  1.2.0
+		 *
+		 * @param  int $object_id
+		 *
+		 * @return string
+		 */
+		private function get_object_slug( $object_id ) {
+			$object_id = abs( (int) $object_id );
+
+			if ( ! $object_id ) {
+				return '';
+			}
+
+			$post = get_post( $object_id );
+
+			return $post ? $post->post_name : '';
 		}
 
 

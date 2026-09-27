@@ -5,7 +5,7 @@ export default class Meta extends Component {
     renderCategories() {
         if ('undefined' !== typeof this.props.categories) {
             return this.props.categories.map((cat, i) => {
-                if (1 == this.props.categories.length || cat.slug !== 'uncategorized') {
+                if (1 === this.props.categories.length || cat.slug !== 'uncategorized') {
                     return (<span key={cat.term_id}>
                         <Link to={this.getCategoryPath(cat.link)} className="cat-links">{cat.name}</Link>
                         {(1 < this.props.categories.length && i < (this.props.categories.length - 1)) ? ', ' : ''}

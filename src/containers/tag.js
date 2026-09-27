@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {connect, dispatch} from 'react-redux';
+import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
 import {fetchPostsFromTax, getTaxIdFromSlug, ROUTER} from '../actions/index';
@@ -22,7 +22,9 @@ class Category extends Component {
             this.props.getTaxIdFromSlug('tags', nextProps.match.params.slug);
         }
 
-        if (JSON.stringify(this.props.tags) !== JSON.stringify(nextProps.tags)) {
+        // An unknown tag slug resolves to an empty array; guard before reading
+        // `tags[0].id` off it.
+        if (nextProps.tags.length && JSON.stringify(this.props.tags) !== JSON.stringify(nextProps.tags)) {
             this.props.fetchPostsFromTax('tags', nextProps.tags[0].id, nextProps.match.params.pageNum);
         }
         this.props.dispatch({

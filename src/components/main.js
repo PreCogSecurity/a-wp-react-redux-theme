@@ -19,8 +19,8 @@ class Main extends Component {
 		if (posts.length) {
 			return posts.map(post => {
 				return (<Article key={post.id}
-				                 post={post}
-				                 isSingle={this.isSingle()}/>);
+					post={post}
+					isSingle={this.isSingle()}/>);
 			});
 		} else {
 			const counter = [...Array(20)];

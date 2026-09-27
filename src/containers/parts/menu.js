@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import { bindActionCreators } from 'redux'
+import { bindActionCreators } from 'react-redux'
 import {Link} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {fetchMenu} from '../../actions';
@@ -14,18 +14,24 @@ class Menu extends Component {
     }
 
     renderMenu(menu) {
-        if ( this.props.name === menu.name) {
-            return menu.items.map(item => {
-                return (
-                    <li key={item.ID} className="nav-item">
-                        <Link className="nav-link" to={Menu.getRelativeUrl(item.url)}>{item.title}</Link>
-                    </li>
-                );
-            });
+        if ( !menu || !Array.isArray(menu.items) || this.props.name !== menu.name) {
+            return null;
         }
+
+        return menu.items.map(item => {
+            return (
+                <li key={item.ID} className="nav-item">
+                    <Link className="nav-link" to={Menu.getRelativeUrl(item.url)}>{item.title}</Link>
+                </li>
+            );
+        });
     }
 
     static getRelativeUrl(url) {
+        if (typeof url !== 'string' || !url.length) {
+            return '/';
+        }
+
         if (url === window.location.origin) {
             return '/';
         }
@@ -45,7 +51,6 @@ class Menu extends Component {
     }
 
     render() {
-        console.log("MENU",this.props)
         return (
             <ul className={this.getClasses(this.props.menu.name)}>
                 {this.renderMenu(this.props.menu)}

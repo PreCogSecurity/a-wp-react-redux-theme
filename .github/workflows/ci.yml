@@ -1,16 +1,84 @@
 name: CI
+
 on:
   push:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege: CI only ever needs to read the repository.
+permissions:
+  contents: read
+
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  verify:
+    name: Lint, test and build
+    runs-on: ubuntu-22.04
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node from .nvmrc
+        uses: actions/setup-node@v4
         with:
+          node-version-file: '.nvmrc'
           cache: 'npm'
-      - run: npm ci
-      - run: npm test
+
+      # The toolchain is pinned to the version .nvmrc names. node-sass 4 only
+      # ships prebuilt bindings for Node <= 14 and webpack 3 needs the OpenSSL
+      # 1.1 that Node 14 bundles, so installing on a modern Node would fail and
+      # take lint/test down with it. See CONTRIBUTING.md for the upgrade plan.
+      - name: Install dependencies from the lockfile
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests with coverage
+        run: npm test
+
+      - name: Build the bundle
+        run: npm run build
+
+      # bundle.js / bundle.css are committed because WordPress serves them
+      # straight from the theme directory. The build needs the pinned Node from
+      # .nvmrc, so the artifacts are published here for a maintainer to review
+      # and commit rather than regenerated on every merge.
+      - name: Upload the built bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle
+          path: |
+            bundle.js
+            bundle.css
+          if-no-files-found: error
+
+  audit:
+    name: Dependency audit (advisory)
+    runs-on: ubuntu-22.04
+    # Non-blocking by design. The build toolchain is a 2017-era tree
+    # (webpack 3 / babel 6 / node-sass 4) and will report advisories until it is
+    # modernised; failing the build on those would mean ignoring the job
+    # entirely. This surfaces the count on every run so the debt stays visible.
+    continue-on-error: true
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node from .nvmrc
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies from the lockfile
+        run: npm ci --ignore-scripts
+
+      - name: Report high and critical advisories
+        run: npm audit --audit-level=high || true
