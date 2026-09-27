@@ -1,20 +1,26 @@
 import React, {Component} from 'react';
-import {connect} from 'react-redux';
 import {withRouter} from 'react-router';
 
 class Content extends Component {
-	constructor() {
-		super();
-	}
-
 	navigate(event) {
-		if (event.target.tagName === 'A') {
-			let href = event.target.getAttribute('href');
-			if ((href.includes(RT_API.baseUrl) || href.startsWith('/')) && '_blank' !== event.target.getAttribute('target').toLowerCase()) {
-				event.preventDefault();
-				href = href.replace(RT_API.baseUrl, '');
-				this.props.history.push(href);
-			}
+		if (event.target.tagName !== 'A') {
+			return;
+		}
+
+		const href = event.target.getAttribute('href');
+
+		// Links inside post content frequently have no `target` attribute, so
+		// getAttribute() returns null here. Calling .toLowerCase() on that null
+		// threw a TypeError that blanked out the whole post.
+		const target = (event.target.getAttribute('target') || '').toLowerCase();
+
+		if (!href) {
+			return;
+		}
+
+		if ((href.includes(RT_API.baseUrl) || href.startsWith('/')) && '_blank' !== target) {
+			event.preventDefault();
+			this.props.history.push(href.replace(RT_API.baseUrl, ''));
 		}
 	}
 
@@ -26,8 +32,4 @@ class Content extends Component {
 	}
 }
 
-function mapStateToProps({router}) {
-	return {router};
-}
-
-export default withRouter(connect()(Content));
+export default withRouter(Content);

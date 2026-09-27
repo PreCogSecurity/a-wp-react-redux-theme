@@ -19,7 +19,7 @@ class Single extends Component {
     }
 
     componentDidUpdate() {
-        document.title = `${RT_API.siteName} - ${RT_API.siteDescription}`;;
+        document.title = `${RT_API.siteName} - ${RT_API.siteDescription}`;
     }
 
     render() {

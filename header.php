@@ -2,10 +2,10 @@
 <html <?php language_attributes(); ?> class="no-js">
 <head>
     <script>(function(H){H.className=H.className.replace(/\bno-js\b/,'js')})(document.documentElement)</script>
-    <meta charset="<?php bloginfo( 'charset' ); ?>">
+    <meta charset="<?php echo esc_attr( get_bloginfo( 'charset' ) ); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="profile" href="http://gmpg.org/xfn/11">
-    <link rel="pingback" href="<?php bloginfo( 'pingback_url' ); ?>">
+    <link rel="profile" href="https://gmpg.org/xfn/11">
+    <link rel="pingback" href="<?php echo esc_url( get_bloginfo( 'pingback_url' ) ); ?>">
 
 	<?php wp_head(); ?>
 </head>
@@ -13,7 +13,7 @@
 <div id="react-main">
     <section class="container-fluid <?php Theme_Helpers::get_class( 'template-blog', 'template-single' ); ?>">
         <header class="navbar navbar-expand-lg navbar-light bg-light"><h1 class="navbar-brand"><a
-                        href="/"><?php bloginfo( 'name' ); ?></a></h1>
+                        href="<?php echo esc_url( home_url( '/' ) ); ?>"><?php bloginfo( 'name' ); ?></a></h1>
             <nav class="collapse navbar-collapse">
 				<?php wp_nav_menu( [
 					'theme_location' => 'main_menu',

@@ -1,0 +1,35 @@
+version: 2
+
+updates:
+  # Front-end runtime + build dependencies.
+  - package-ecosystem: npm
+    directory: '/'
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - npm
+    commit-message:
+      prefix: 'npm'
+    groups:
+      # Keep test/lint tooling churn in its own reviewable PR, separate from
+      # the runtime dependencies that end up in the shipped bundle.
+      dev-dependencies:
+        applies-to: version-updates
+        dependency-type: development
+
+  # WordPress.org / plugin security updates surfaced by Dependabot are not
+  # applicable here (this is a theme, not a plugin), but GitHub's own
+  # dependabot keeps the actions in .github/workflows current.
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: 'ci'

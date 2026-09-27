@@ -17,6 +17,14 @@ import rootReducer from './reducers';
 
 const siteBaseUrl = RT_API.baseUrl.replace(['http://','https://'],'').replace(window.location.origin.replace(['http://','https://'],''), '');
 const history = createBrowserHistory({basename: siteBaseUrl});
+
+// `redux-logger` dumps every dispatched action *and* the resulting state to the
+// browser console. In production that means full post bodies, comment content
+// and the authenticated user context are readable by anything with devtools
+// open, and every dispatch pays a JSON serialisation cost. Only run it in
+// development.
+const isDevelopment = 'production' !== process.env.NODE_ENV;
+
 const store = createStore(
 	connectRouter(history)(rootReducer),
 	compose(
@@ -24,7 +32,7 @@ const store = createStore(
 			routerMiddleware(history),
 			promise(),
 			thunk,
-			createLogger()
+			...(isDevelopment ? [createLogger()] : [])
 		)
 	)
 );

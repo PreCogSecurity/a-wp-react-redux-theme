@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {connect, dispatch} from 'react-redux';
+import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 
 import {fetchPostsFromTax, getTaxIdFromSlug, ROUTER} from '../actions/index';
@@ -22,7 +22,10 @@ class Category extends Component {
             this.props.getTaxIdFromSlug('categories', nextProps.match.params.slug);
         }
 
-        if (JSON.stringify(this.props.cat) !== JSON.stringify(nextProps.cat) || nextProps.match.params.pageNum !== this.props.match.params.pageNum) {
+        // An unknown or mistyped category slug resolves to an empty array, so
+        // `cat[0]` is undefined here. Reading `.id` off it threw a TypeError
+        // and took the whole page down with it.
+        if (nextProps.cat.length && (JSON.stringify(this.props.cat) !== JSON.stringify(nextProps.cat) || nextProps.match.params.pageNum !== this.props.match.params.pageNum)) {
             this.props.fetchPostsFromTax('categories', nextProps.cat[0].id, nextProps.match.params.pageNum);
         }
 

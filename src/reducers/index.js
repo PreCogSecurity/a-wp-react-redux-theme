@@ -6,6 +6,7 @@ import tags from './tag-reducer';
 import cat from './cat-reducer';
 import comments from './comments-reducer';
 import routerMatch from './routerMatch-reducer';
+import requests from './requests-reducer';
 
 export default combineReducers({
     posts,
@@ -13,5 +14,6 @@ export default combineReducers({
     tags,
     cat,
     comments,
-    routerMatch
+    routerMatch,
+    requests
 });
